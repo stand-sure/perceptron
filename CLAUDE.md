@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Two interactive browser-based teaching artifacts ("4FF Field Manual · Perceptrons & Backprop") plus the long-form companion essays at the root (`01-PROMPT.md`, `02-NUMERICAL-NOTES.md`, `03-CORRECTNESS-IS-NOT-COMPOSITIONAL.md`, `04-HUMAN-IN-THE-LOOP-IS-NOT-A-CHECKBOX.md`, `PITCH-SMR.md`). Built for the 4FF engineering development program at Innago, open-sourced on Chris Anderson's personal GitHub.
+Two interactive browser-based teaching artifacts ("4FF Field Manual · Perceptrons & Backprop") plus the long-form companion essays at the root (`01-PROMPT.md`, `02-NUMERICAL-NOTES.md`, `03-CORRECTNESS-IS-NOT-COMPOSITIONAL.md`, `04-HUMAN-IN-THE-LOOP-IS-NOT-A-CHECKBOX.md`). Built for the 4FF engineering development program at Innago, open-sourced on Chris Anderson's personal GitHub.
 
 The artifacts are the *subject* of the lesson, not just an illustration of it — they exist to de-mystify ML by being entirely inspectable. **Preserve that property when editing.**
 
