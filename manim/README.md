@@ -14,11 +14,12 @@ The web artifact and these animations have nothing in common technically. Mixing
 
 ## System dependencies
 
-ManimCE is pure Python and `uv add manim` installs cleanly, but rendering needs:
+ManimCE is pure Python, but rendering needs:
 
 - **FFmpeg** — video encoding. `brew install ffmpeg`.
-- **Cairo, Pango** — vector and text rendering. Usually pulled in by Manim's pip install on macOS; if not, `brew install cairo pango`.
-- **A LaTeX distribution** — only required for `MathTex` mathematical typesetting. **MacTeX** on macOS, **TeX Live** on Linux. Scenes that use only `Text` (Pango-rendered) will render without LaTeX; scenes that use `MathTex` will fail until a LaTeX install is on `PATH`.
+- **Cairo, Pango** — vector and text rendering. `brew install cairo pango pkg-config`.
+- **`py3cairo`** — `brew install py3cairo`. **Required on macOS arm64** to work around a broken pycairo wheel; see "Known issues" below.
+- **A LaTeX distribution** — only required for `MathTex` mathematical typesetting. **MacTeX** on macOS, **TeX Live** on Linux. Scenes that use only `Text` (Pango-rendered) render without LaTeX; scenes that use `MathTex` will fail until a LaTeX install is on `PATH`.
 
 The first scene (`part2_warp_canonical.py`) is deliberately written with `Text` only so it renders without LaTeX. Subsequent scenes that need mathematical typesetting will use `MathTex` and require LaTeX.
 
@@ -27,20 +28,22 @@ The first scene (`part2_warp_canonical.py`) is deliberately written with `Text` 
 From this directory:
 
 ```bash
-# install dependencies (creates .venv/, populates uv.lock)
-uv sync
+# install dependencies + apply the macOS arm64 pycairo workaround
+make sync
 
 # render a scene at low quality (fast iteration)
-uv run manim render scenes/part2_warp_canonical.py PartIIWarpCanonical -ql
+make render            # equivalent: uv run manim render scenes/...py ClassName -ql
 
 # render at high quality for committing to renders/
-uv run manim render scenes/part2_warp_canonical.py PartIIWarpCanonical -qh
+make render-hd         # equivalent: uv run manim render scenes/...py ClassName -qh
 
 # preview a scene interactively (opens player on completion)
-uv run manim render scenes/part2_warp_canonical.py PartIIWarpCanonical -ql -p
+make preview
 ```
 
 Manim writes outputs under `media/` by default. Move the keeper renders to `renders/` for tracking via Git LFS.
+
+> **Use `make sync`, not bare `uv sync`.** The `Makefile` chains the pycairo fix-up after the install. Running `uv sync` directly will leave you with the broken pycairo and a confusing `incompatible architecture` error at first import.
 
 ## Scenes
 
@@ -69,3 +72,13 @@ If a reader can get the lesson from the live JSX alone, the video is unnecessary
 ## Determinism
 
 Training scenes use `numpy.random.default_rng(seed)` with hand-picked seeds known to converge cleanly. The "canonical" in `part2_warp_canonical.py` is load-bearing: this is the run that always produces a recognizable warp, regardless of how it might land in the live JSX where seeds are not pinned.
+
+## Known issues
+
+### pycairo wheel broken on macOS arm64 (PyPI 1.29.0)
+
+The published `pycairo` 1.29.0 macOS arm64 wheel is mislabeled — it carries the arm64 platform tag but ships an x86_64 `_cairo.cpython-*-darwin.so`, which fails to load on Apple Silicon with an `incompatible architecture` `ImportError`. Source-building from the upstream sdist with uv also produces a non-functional binary on this platform: the resulting `.so` is x86_64 *and* not linked against `libcairo` (only against `libSystem`). Neither `--no-binary :all:` nor explicit `ARCHFLAGS="-arch arm64"` change this; multiple Python versions (uv-managed and Homebrew, 3.12 / 3.13 / 3.14) reproduce the same failure mode.
+
+The reliable workaround is to install `py3cairo` via Homebrew — `brew install py3cairo` — and then overlay its working arm64 build into the venv after each `uv sync`. `scripts/fix-pycairo.sh` does this; the `make sync` target chains it automatically. Linux and Intel-Mac forkers can ignore this and use plain `uv sync`; the script is a no-op on non-arm64-macOS hosts.
+
+This is upstream's bug to fix; the workaround should be removable once a corrected wheel ships.

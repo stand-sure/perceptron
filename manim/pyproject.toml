@@ -8,3 +8,8 @@ dependencies = [
     "manim>=0.20.1",
     "numpy>=2.4.4",
 ]
+
+# pycairo on macOS arm64 — see manim/scripts/fix-pycairo.sh and the README's
+# "Known issues" section. uv installs the upstream wheel (broken on Apple
+# Silicon as of pycairo 1.29.0); the fix-up script overlays Homebrew's
+# working build. Run `make sync` instead of `uv sync` for the combined flow.
