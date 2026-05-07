@@ -7,3 +7,13 @@ dist/
 .vite/
 .private/
 .claude/settings.local.json
+
+# Python (manim companion)
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.python-cache/
+
+# Manim build artifacts (only the curated keepers in manim/renders/ are tracked, via LFS)
+manim/media/
